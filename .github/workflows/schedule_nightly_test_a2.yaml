@@ -366,7 +366,7 @@ jobs:
     runs-on: linux-aarch64-a2b3-0
     steps:
       - name: Merge all benchmark result artifacts
-        uses: actions/upload-artifact/merge@v4
+        uses: actions/upload-artifact/merge@v7
         continue-on-error: true
         with:
           name: nightly-a2

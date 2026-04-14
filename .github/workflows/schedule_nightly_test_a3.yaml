@@ -397,7 +397,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Merge all benchmark result artifacts
-        uses: actions/upload-artifact/merge@v4
+        uses: actions/upload-artifact/merge@v7
         continue-on-error: true
         with:
           name: nightly-a3
