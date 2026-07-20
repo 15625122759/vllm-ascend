@@ -99,6 +99,15 @@ env_variables: dict[str, Callable[[], Any]] = {
     # Control the aclrtMemcpyBatchAsync compile path for KV cache offloading.
     # "1": force enable, "0": force disable, None: auto-detect from CANN headers.
     "VLLM_ASCEND_ENABLE_BATCH_MEMCPY": lambda: os.getenv("VLLM_ASCEND_ENABLE_BATCH_MEMCPY", None),
+    # Whether to enable the fused aclnnSimThreadExponential kernel for the
+    # exponential random sampling in AscendSampler. When enabled, the original
+    # 7-op decomposition (InplaceUniform+Neg+Adds+GeScalar+MaskedFill+Log+Muls)
+    # of torch.Tensor.exponential_ is replaced by a single
+    # torch_npu.npu_sim_exponential_ call. Default 0 (off) to preserve baseline
+    # behavior; set to 1 to enable the fusion.
+    "VLLM_ASCEND_ENABLE_SIM_EXPONENTIAL": lambda: bool(
+        int(os.getenv("VLLM_ASCEND_ENABLE_SIM_EXPONENTIAL", "0"))
+    ),
 }
 
 # end-env-vars-definition

@@ -4,6 +4,7 @@ import logging
 from dataclasses import replace
 
 import torch
+import torch_npu
 from vllm.distributed.parallel_state import get_tp_group
 from vllm.logger import logger
 from vllm.triton_utils import HAS_TRITON
@@ -922,14 +923,20 @@ def sample_recovered_tokens(
         dtype=torch.float32,
         device=device,
     )
-    q.exponential_()
+    if get_ascend_config().enable_sim_exponential:
+        torch_npu.npu_sim_exponential_(q)
+    else:
+        q.exponential_()
 
     num_draft_tensor = torch.tensor(num_draft_tokens, pin_memory=True).to(device, non_blocking=True)
     has_draft_mask = num_draft_tensor > 0
 
     for i, generator in sampling_metadata.generators.items():
         temp_q = torch.empty_like(q[i])
-        temp_q.exponential_(generator=generator)
+        if get_ascend_config().enable_sim_exponential:
+            torch_npu.npu_sim_exponential_(temp_q, generator=generator)
+        else:
+            temp_q.exponential_(generator=generator)
         q[i] = torch.where(has_draft_mask[i], temp_q, q[i])
 
     recovered_token_ids = torch.empty_like(draft_token_ids)

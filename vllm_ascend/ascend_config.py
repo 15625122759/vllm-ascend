@@ -271,6 +271,20 @@ class AscendConfig:
         # Enable optimized reduce sampling scheme
         self.enable_reduce_sample = additional_config.get("enable_reduce_sample", False)
 
+        # Whether to replace torch.Tensor.exponential_ (decomposed into 7 aclnn
+        # ops: InplaceUniform+Neg+Adds+GeScalar+InplaceMaskedFillScalar+Log+
+        # InplaceMuls on 910B3) with the single fused torch_npu.
+        # npu_sim_exponential_ (aclnnSimThreadExponential) kernel in the
+        # AscendSampler random_sample / sample_recovered_tokens paths.
+        # Precedence: additional_config.enable_sim_exponential > env var
+        # VLLM_ASCEND_ENABLE_SIM_EXPONENTIAL (default 0 / False).
+        self.enable_sim_exponential = self._get_config_value(
+            additional_config,
+            "enable_sim_exponential",
+            "VLLM_ASCEND_ENABLE_SIM_EXPONENTIAL",
+            ascend_envs.VLLM_ASCEND_ENABLE_SIM_EXPONENTIAL,
+        )
+
         self.mix_placement = additional_config.get("mix_placement", False)
         self._check_mix_placement()
 

@@ -1,4 +1,5 @@
 import torch
+import torch_npu
 import vllm.envs as envs
 from vllm.distributed.parallel_state import get_tp_group
 from vllm.logger import logger
@@ -14,6 +15,31 @@ from vllm_ascend.utils import AscendDeviceType, get_ascend_device_type, global_s
 DEFAULT_LOGPROBS_MODE = "raw_logprobs"
 
 _SAMPLING_EPS = 1e-5
+
+
+def _fill_exponential(q: torch.Tensor, generator: torch.Generator | None = None) -> None:
+    """In-place fill ``q`` with exponential-distributed random numbers.
+
+    When ``AscendConfig.enable_sim_exponential`` is enabled, the fused
+    ``torch_npu.npu_sim_exponential_`` kernel (single aclnnSimThreadExponential
+    op, which fuses InplaceUniform+Neg+Adds+GeScalar+InplaceMaskedFillScalar+
+    Log+InplaceMuls on 910B3) is used instead of ``torch.Tensor.exponential_``,
+    whose 7-op decomposition forces 6 intermediate results to round-trip
+    through GM. Both paths are statistically equivalent:
+    ``exponential_``:  X = -ln(U) / lambda,        U ~ Uniform(0, 1]
+    ``npu_sim_exponential_``: X = -ln(1-u) / lambda, u ~ Uniform(0, 1]
+    (since 1-u is also Uniform[0, 1), the two distributions coincide).
+    """
+    if get_ascend_config().enable_sim_exponential:
+        if generator is not None:
+            torch_npu.npu_sim_exponential_(q, generator=generator)
+        else:
+            torch_npu.npu_sim_exponential_(q)
+    else:
+        if generator is not None:
+            q.exponential_(generator=generator)
+        else:
+            q.exponential_()
 
 
 def random_sample(
@@ -32,12 +58,12 @@ def random_sample(
     with npu_stream_switch(global_stream()):
         q = torch.empty_like(probs)
         if len(generators) != probs.shape[0]:
-            q.exponential_()
+            _fill_exponential(q)
         if generators:
             # TODO(woosuk): This can be slow because we handle each request
             # one by one. Optimize this.
             for i, generator in generators.items():
-                q[i].exponential_(generator=generator)
+                _fill_exponential(q[i], generator)
     torch.npu.current_stream().wait_stream(global_stream())
     return probs.div_(q).argmax(dim=-1).view(-1)
 
