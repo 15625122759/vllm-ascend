@@ -27,18 +27,19 @@ A5 上已完成：29 项 pytest（23 e2e + 6 UT）、算子级 B=1..64 扫描、
 
 ## 2. 已完成 vs 待补
 
-| 项 | A5（已完成） | 910B（待补） | 脚本 |
+| 项 | A5（已完成） | 910B（回填状态） | 脚本 |
 | --- | --- | --- | --- |
-| 环境快照 | ✅ | ⬜ | `scripts/env_check.sh` |
-| 单算子 pytest（29 项） | ✅ | ⬜ | `scripts/run_op_tests.sh` |
-| 算子级完整 API 扫描 | ✅ B=1..64，V=248320 | ⬜ V=32000/151936/248320，B=1..64 | `scripts/bench_op.py` |
-| 门控交叉点 | ✅ A5：V≥65536→B≥32；V<65536→B≥8 | ⬜ 重新标定（只记录，不改代码） | `scripts/gate_report.py` |
-| 精度（10 组 shape/dtype） | ✅ 10/10 PASS | ⬜ | `scripts/precision_check.py` |
-| serving 压测（300 prompts / rate 10） | ✅ TPOT 46.59 / P99 51.18 / P99 ITL 400.21 | ⬜ baseline 与 latest 各一次 | `scripts/serve_bench.sh` |
-| trace 采样链 | ✅ 链 218.6 µs，sort 计数 0 | ⬜ | profiler + `scripts/extract_chain.py` |
-| 真实 logits 回放 | ✅ prefill 1.61x / decode 4.34x | ⬜（可选，需临时采集钩子） | `docs/` 说明 + 复用 A5 脚本 |
+| 环境快照 | ✅ | ✅ `results/env_910b.json` | `scripts/env_check.sh` |
+| 单算子 pytest（29 项） | ✅ | ✅ 29 passed | `scripts/run_op_tests.sh` |
+| 算子级完整 API 扫描 | ✅ B=1..64，V=248320 | ✅ 3 V × B=1..64 × fp32/bf16 | `scripts/bench_op.py` |
+| 门控交叉点 | ✅ A5：V≥65536→B≥32；V<65536→B≥8 | ✅ 实测交叉 B=1（`results/gate_910b.md`） | `scripts/gate_report.py` |
+| 精度（10 组 shape/dtype） | ✅ 10/10 PASS | ✅ 10/10 PASS | `scripts/precision_check.py` |
+| serving 压测（300 prompts / rate 10） | ✅ TPOT 46.59 / P99 51.18 / P99 ITL 400.21 | ❌ CANN 9.0 阻塞（0/300，`ScatterPaKvCache` 非连续 KV cache） | `scripts/serve_bench.sh` |
+| trace 采样链 | ✅ 链 218.6 µs，sort 计数 0 | ◐ 算子级链 p50 314.2 µs，sort 计数 0（非 serving 链） | profiler + `scripts/extract_chain.py` |
+| 真实 logits 回放 | ✅ prefill 1.61x / decode 4.34x | ⬜ 需 serving 先可用 | `docs/` 说明 + 复用 A5 脚本 |
 | 重编译黑盒计数 | ⬜ 白盒已完成 | ⬜（可选） | 见 `missing_data.md` §8 |
 | GPQA 精度 | ⬜ 无数据集 | ⬜（有数据集再做） | 见 `missing_data.md` §9 |
+
 
 ## 3. 快速开始
 
@@ -128,3 +129,19 @@ handoff/910b/results/
 | `scripts/extract_chain.py` | kernel_details.csv → 采样链时间戳证据 |
 
 参考文档：`docs/triton开发规范.md`、`docs/PR17211_AuroraEmiya回检.md`、`docs/PR描述草稿.md`。
+
+## 8. 910B 回填结果（2026-11-03）
+
+完整数据与命令见 **`results/MANIFEST.md`**。要点：
+
+- 单算子：**29 passed**；精度 **10/10 PASS**（fp32 `torch.equal`，bf16 kept 差 ≤1）。
+- 算子级（完整 API，p50）：V=248320 时 B=1/8/16/32/64 对 PyTorch
+  **1.50x/1.79x/2.14x/2.24x/2.64x（fp32）**、**1.51x/1.82x/2.36x/2.15x/2.54x（bf16）**；
+  V=151936 B=64 为 2.33x/2.22x；V=32000 各 B 约 1.03–1.20x。
+- 门控：910B 实测交叉点全部为 **B=1**；A5 阈值（32/8）作为保守下界保留，未改代码。
+- trace（算子级 no-sort）：TopK p50 133.1 µs + pass1 34.3 µs + pass2 27.0 µs，
+  链 p50 314.2 µs、p99 347.0 µs，`SortAiCoreForDavid` 计数 **0**。
+- serving **未跑通**：CANN 9.0.0 的 `aclnnScatterPaKvCache` 拒绝非连续 KV cache（错误码 561000），
+  baseline 0/300；这是 CANN 版本约束，与 `enable_triton_apply_topk_topp` 开关无关。
+  需要 CANN 9.1 环境后按 `serve_baseline_910b/MANIFEST.md` 的同一命令复测。
+

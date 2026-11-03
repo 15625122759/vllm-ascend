@@ -1,0 +1,87 @@
+{
+  "baseline": "vllm_ascend.worker.v2.sample.apply_top_k_top_p._apply_top_k_top_p_pytorch",
+  "rows": [
+    {
+      "B": 4,
+      "V": 1000,
+      "dtype": "float32",
+      "masked_equal_vs_pytorch": true,
+      "kept_diff_max": 0,
+      "pass": true
+    },
+    {
+      "B": 8,
+      "V": 4096,
+      "dtype": "float32",
+      "masked_equal_vs_pytorch": true,
+      "kept_diff_max": 0,
+      "pass": true
+    },
+    {
+      "B": 4,
+      "V": 4097,
+      "dtype": "float32",
+      "masked_equal_vs_pytorch": true,
+      "kept_diff_max": 0,
+      "pass": true
+    },
+    {
+      "B": 8,
+      "V": 32000,
+      "dtype": "float32",
+      "masked_equal_vs_pytorch": true,
+      "kept_diff_max": 0,
+      "pass": true
+    },
+    {
+      "B": 2,
+      "V": 151936,
+      "dtype": "float32",
+      "masked_equal_vs_pytorch": true,
+      "kept_diff_max": 0,
+      "pass": true
+    },
+    {
+      "B": 4,
+      "V": 1000,
+      "dtype": "bfloat16",
+      "masked_equal_vs_pytorch": true,
+      "kept_diff_max": 0,
+      "pass": true
+    },
+    {
+      "B": 8,
+      "V": 4096,
+      "dtype": "bfloat16",
+      "masked_equal_vs_pytorch": true,
+      "kept_diff_max": 0,
+      "pass": true
+    },
+    {
+      "B": 4,
+      "V": 4097,
+      "dtype": "bfloat16",
+      "masked_equal_vs_pytorch": true,
+      "kept_diff_max": 1,
+      "pass": true
+    },
+    {
+      "B": 8,
+      "V": 32000,
+      "dtype": "bfloat16",
+      "masked_equal_vs_pytorch": true,
+      "kept_diff_max": 0,
+      "pass": true
+    },
+    {
+      "B": 2,
+      "V": 151936,
+      "dtype": "bfloat16",
+      "masked_equal_vs_pytorch": true,
+      "kept_diff_max": 0,
+      "pass": true
+    }
+  ],
+  "passed": 10,
+  "total": 10
+}

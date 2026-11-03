@@ -1,0 +1,24 @@
+{
+  "machine": "aarch64",
+  "python": "3.12.13",
+  "cann": {
+    "ASCEND_HOME_PATH": "/usr/local/Ascend/cann-9.0.0",
+    "ASCEND_TOOLKIT_HOME": "/usr/local/Ascend/cann-9.0.0",
+    "ASCEND_OPP_PATH": "/usr/local/Ascend/cann-9.0.0/opp"
+  },
+  "torch": "2.10.0+cpu",
+  "torch-npu": "2.10.0.post4",
+  "vllm": "0.1.dev1+g544f182d9.empty",
+  "triton-ascend": "3.6.0.post2",
+  "triton": null,
+  "vllm-ascend": "0.23.1.dev0+g5cb98caaa.d20260821",
+  "torch_npu": "2.10.0.post4",
+  "soc_version": 223,
+  "device_name": "Ascend910B3",
+  "vllm_runtime": "0.1.dev1+g544f182d9",
+  "vllm_file": "/workspace/1102/vllm_src/vllm/__init__.py",
+  "vllm_ascend_file": "/workspace/1102/handoff_repo/vllm_ascend/__init__.py",
+  "vllm_ascend_version": null,
+  "vector_core": 40,
+  "ub_size_bytes": 196608
+}

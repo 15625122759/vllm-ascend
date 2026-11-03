@@ -1,0 +1,11 @@
+4x1000    float32 masked_equal=True kept_diff=0 PASS
+8x4096    float32 masked_equal=True kept_diff=0 PASS
+4x4097    float32 masked_equal=True kept_diff=0 PASS
+8x32000   float32 masked_equal=True kept_diff=0 PASS
+2x151936  float32 masked_equal=True kept_diff=0 PASS
+4x1000    bfloat16 masked_equal=True kept_diff=0 PASS
+8x4096    bfloat16 masked_equal=True kept_diff=0 PASS
+4x4097    bfloat16 masked_equal=True kept_diff=1 PASS
+8x32000   bfloat16 masked_equal=True kept_diff=0 PASS
+2x151936  bfloat16 masked_equal=True kept_diff=0 PASS
+summary: 10/10 PASS

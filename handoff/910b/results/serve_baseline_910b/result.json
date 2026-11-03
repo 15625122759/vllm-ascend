@@ -1,0 +1,13 @@
+{
+  "success": null,
+  "failed": 300,
+  "duration": 76.42,
+  "out_toks": 0.0,
+  "tpot_mean": 0.0,
+  "tpot_p99": 0.0,
+  "itl_mean": 0.0,
+  "itl_p99": 0.0,
+  "ttft_mean": 0.0,
+  "ttft_p99": 0.0,
+  "source": "handoff/910b/results/serve_baseline_910b/bench.log"
+}

@@ -120,5 +120,20 @@ lm_eval --model vllm --model_args pretrained=<model>,tensor_parallel_size=1 \
 ## 10. 回填位置
 
 - 原始结果 → `handoff/910b/results/`
-- 结论摘要 → 本文件的“910B 结果”小节（新增），或 `results/MANIFEST.md`
+- 结论摘要 → **`handoff/910b/results/MANIFEST.md`**（2026-11-03 已回填）
 - 若需更新 PR 文档，回到 `1102/docs` 同步（不要在本分支改 `docs/` 之外的代码）
+
+## 910B 结果（2026-11-03）
+
+| 项 | 结果 |
+| --- | --- |
+| 环境 | 910B3（soc 223）、40 vector core、UB 192 KB、CANN 9.0.0、triton-ascend 3.6.0.post2 |
+| pytest | 29 passed |
+| 算子级 | B=16 全部 ≥1.0x；最高 V=248320 B=64 fp32 2.64x / bf16 2.54x |
+| 门控 | 实测交叉点全部 B=1；A5 阈值保留（未改 `_GATE_*`） |
+| 精度 | 10/10 PASS |
+| serving | ❌ 0/300，CANN 9.0 `ScatterPaKvCache` 非连续 KV cache（需 CANN 9.1） |
+| trace | ◐ 算子级 no-sort 链 p50 314.2 µs，sort 计数 0（非 serving 链） |
+
+详见 `results/MANIFEST.md`。
+
