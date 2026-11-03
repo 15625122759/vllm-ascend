@@ -1,0 +1,6 @@
+pr: 17211
+entries:
+  - category: feature
+    text: Added an optional Triton apply_top_k_top_p op for V2 sampling, enabled with `enable_triton_apply_topk_topp: true` in `additional_config`.
+  - category: performance
+    text: The Triton apply_top_k_top_p op avoids the full-vocabulary sort and lowers sampling latency at small batch sizes.

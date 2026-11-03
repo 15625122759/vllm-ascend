@@ -115,7 +115,10 @@ from vllm_ascend.ops.triton.sample.thinking_budget import (  # noqa: E402
     _load_effective_token_ascend,
     _update_committed_marker_cache_kernel_ascend,
 )
-from vllm_ascend.worker.v2.sample.apply_top_k_top_p import apply_top_k_top_p_npu  # noqa: E402
+from vllm_ascend.worker.v2.sample.apply_top_k_top_p import (  # noqa: E402
+    apply_top_k_top_p_npu,
+    get_top_k_top_p_with_hint,
+)
 from vllm_ascend.worker.v2.sample.bad_words import apply_bad_words  # noqa: E402
 from vllm_ascend.worker.v2.sample.gumbel import apply_temperature  # noqa: E402
 from vllm_ascend.worker.v2.sample.logprob import compute_token_logprobs, compute_topk_logprobs  # noqa: E402
@@ -147,6 +150,9 @@ base_speculator.gumbel_sample = categorical_sample
 dspark_speculator.gumbel_sample = categorical_sample
 sampler.gumbel_sample = categorical_sample
 topk_topp_sampler.apply_top_k_top_p_triton = apply_top_k_top_p_npu
+# Publish the CPU-side max(k) so the Triton op can size its top-k width
+# without a per-step device sync (see apply_top_k_top_p_npu).
+states.SamplingStates.get_top_k_top_p = get_top_k_top_p_with_hint
 structured_outputs._apply_grammar_bitmask_kernel = _apply_grammar_bitmask_kernel
 mamba_utils.precopy_mamba_align_fused_kernel = precopy_mamba_align_fused_kernel
 # This patch may be revisited or reverted once the compiler and Triton Ascend toolkit
